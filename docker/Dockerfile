@@ -14,6 +14,8 @@ RUN   apt-get update \
       ros-melodic-novatel-msgs \
       software-properties-common \
       libgoogle-glog-dev \
+      libpcl-dev \
+      ros-melodic-pcl-ros \
       gedit\
       ros-melodic-rtcm-msgs \
       ros-melodic-nmea-navsat-driver \
