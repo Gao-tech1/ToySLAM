@@ -13,7 +13,7 @@ RUN   apt-get update \
       #python-catkin-tools \
       ros-melodic-novatel-msgs \
       software-properties-common \
-      gedit \
+      gedit\
       ros-melodic-rtcm-msgs \
       && add-apt-repository -y ppa:borglab/gtsam-release-4.0 \
       && apt-get update \
@@ -25,8 +25,8 @@ SHELL ["/bin/bash", "-c"]
 RUN   mkdir -p ~/software_ws \
       && mkdir -p ~/catkin_ws/src \
       && cd ~/catkin_ws/src \
-      && git clone https://github.com/XikunLiu-huskit/GLIO.git \
-      && mv ./GLIO/support_files/ceres-solver.tar.gz ~/software_ws/ \
+      && git clone https://github.com/Gao-tech1/ToySLAM \
+      && mv ./ToySLAM/support_files/ceres-solver.tar.gz ~/software_ws/ \
       && cd ~/software_ws \
       && tar -zxvf ceres-solver.tar.gz \
       && mkdir -p ceres-bin \

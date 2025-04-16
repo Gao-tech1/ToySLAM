@@ -9,7 +9,7 @@ help:
 	@echo ""
 
 build:
-	@docker build --tag docker_glio -f ./Dockerfile ..
+	@docker build --tag docker_toyslam -f ./Dockerfile ..
 
 clean:
-	@docker rmi -f docker_glio
+	@docker rmi -f docker_toyslam
