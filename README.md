@@ -46,16 +46,6 @@
    rosrun ToySLAM  ndt_rosbag_mapping_node /home/wws/Download/UrbanNav-HK_Whampoa-20210521_sensors.bag
    ```
 
-## ToySLAM with Docker
-1. Clone this repository into your ROS workspace:
-   ```bash
-   cd ~/catkin_ws/src
-   git clone https://github.com/Gao-tech1/ToySLAM.git
-   cd ./ToySLAM/docker
-   
-   rosrun ToySLAM  ndt_rosbag_mapping_node /home/wws/Download/UrbanNav-HK_Whampoa-20210521_sensors.bag
-   ```
-
 
 ## NEW updates for further extension (Optional)
 1. ```uwb_node.cpp```

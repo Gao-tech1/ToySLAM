@@ -38,6 +38,10 @@ RUN   mkdir -p ~/software_ws \
       && make install \ 
       && cd ~/catkin_ws \
       && source /opt/ros/melodic/setup.bash \
+      && mv /usr/include/flann/ext/lz4.h /usr/include/flann/ext/lz4.h.bak \
+      && mv /usr/include/flann/ext/lz4hc.h /usr/include/flann/ext/lz4.h.bak \
+      && ln -s /usr/include/lz4.h /usr/include/flann/ext/lz4.h \
+      && ln -s /usr/include/lz4hc.h /usr/include/flann/ext/lz4hc.h \
       && catkin_make
       
 RUN echo "source /opt/ros/melodic/setup.bash" >> /root/.bashrc \

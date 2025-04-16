@@ -11,4 +11,4 @@ docker run -it \
   -e GDK_DPI_SCALE \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   -v $(realpath ../../../toyslam_ws):/root/toyslam_ws \
-  docker_glio /bin/bash
+  docker_toyslam /bin/bash
