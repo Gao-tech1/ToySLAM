@@ -192,5 +192,5 @@ target_link_libraries(gnssSpp ${catkin_LIBRARIES} ${CERES_LIBRARIES}
   ${PCL_LIBRARIES}
   # pclomp
   OpenMP::OpenMP_CXX
-  absl::strings
+  #absl::strings
 )

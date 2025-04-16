@@ -13,6 +13,7 @@ RUN   apt-get update \
       #python-catkin-tools \
       ros-melodic-novatel-msgs \
       software-properties-common \
+      libgoogle-glog-dev \
       gedit\
       ros-melodic-rtcm-msgs \
       ros-melodic-nmea-navsat-driver \
