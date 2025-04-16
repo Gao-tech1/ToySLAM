@@ -35,7 +35,7 @@ find_package(catkin REQUIRED COMPONENTS
   gnss_comm
 )
 
-find_package(absl REQUIRED)
+#find_package(absl REQUIRED)
 
 find_package(PCL 1.8 REQUIRED COMPONENTS common io filters kdtree)
 # find_package(PCL REQUIRED)
@@ -54,11 +54,12 @@ include_directories(
   xmlrpcpp
 )
 
+find_package(Glog)
 find_package(Ceres REQUIRED)
 
 
 find_package(Gflags)
-find_package(Glog)
+
 include_directories(${GFLAGS_INCLUDE_DIRS} ${GLOG_INCLUDE_DIRS})
 include_directories(include)
 
@@ -173,7 +174,7 @@ target_link_libraries(uwb_imu_batch_node ${catkin_LIBRARIES} ${CERES_LIBRARIES}
   ${PCL_LIBRARIES}
   # pclomp
   OpenMP::OpenMP_CXX
-  absl::strings
+  #absl::strings
 )
 
 
@@ -192,5 +193,5 @@ target_link_libraries(gnssSpp ${catkin_LIBRARIES} ${CERES_LIBRARIES}
   ${PCL_LIBRARIES}
   # pclomp
   OpenMP::OpenMP_CXX
-  absl::strings
+  #absl::strings
 )
