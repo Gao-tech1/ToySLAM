@@ -15,6 +15,8 @@ RUN   apt-get update \
       software-properties-common \
       gedit\
       ros-melodic-rtcm-msgs \
+      ros-melodic-nmea-navsat-driver \
+      ros-melodic-gps-common \
       && add-apt-repository -y ppa:borglab/gtsam-release-4.0 \
       && apt-get update \
       && apt install -y libgtsam-dev libgtsam-unstable-dev \
