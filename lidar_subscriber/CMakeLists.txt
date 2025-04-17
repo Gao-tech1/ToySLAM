@@ -178,19 +178,19 @@ target_link_libraries(uwb_imu_batch_node ${catkin_LIBRARIES} ${CERES_LIBRARIES}
 )
 
 
-add_executable(loam_mapping_node src/loam_mapping_node.cpp)
-target_link_libraries(loam_mapping_node
-  ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES}
-  ${CERES_LIBRARIES}
-  # pclomp
-  OpenMP::OpenMP_CXX
-)
+#add_executable(loam_mapping_node src/loam_mapping_node.cpp)
+t#arget_link_libraries(loam_mapping_node
+#  ${catkin_LIBRARIES}
+#  ${PCL_LIBRARIES}
+#  ${CERES_LIBRARIES}
+#  # pclomp
+#  OpenMP::OpenMP_CXX
+#)
 
 add_executable(gnssSpp src/gnssSpp.cpp)
 target_link_libraries(gnssSpp ${catkin_LIBRARIES} ${CERES_LIBRARIES}
   ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES}
+  # ${PCL_LIBRARIES}
   # pclomp
   OpenMP::OpenMP_CXX
   #absl::strings
