@@ -13,6 +13,9 @@ RUN   apt-get update \
       #python-catkin-tools \
       ros-melodic-novatel-msgs \
       software-properties-common \
+      libsuitesparse-dev \
+      libcxsparse3 \
+      libsuitesparse-dev \
       libgoogle-glog-dev \
       libpcl-dev \
       ros-melodic-pcl-ros \

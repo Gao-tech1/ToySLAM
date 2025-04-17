@@ -10,7 +10,7 @@
 
 #ifndef GNSS_Tools_HPP
 #define GNSS_Tools_HPP
-#include <nlosExclusion/GNSS_Raw_Array.h>
+#include <nlosexclusion/GNSS_Raw_Array.h>
 // google implements commandline flags processing.
 #include <gflags/gflags.h>
 // google loging tools
@@ -31,11 +31,11 @@ using namespace Eigen;
 struct DDMeasurement
 {
     /* the master satellite is found from user end*/
-    nlosExclusion::GNSS_Raw u_master_SV;
-    nlosExclusion::GNSS_Raw u_iSV;
+    nlosexclusion::GNSS_Raw u_master_SV;
+    nlosexclusion::GNSS_Raw u_iSV;
 
-    nlosExclusion::GNSS_Raw r_master_SV;
-    nlosExclusion::GNSS_Raw r_iSV;
+    nlosexclusion::GNSS_Raw r_master_SV;
+    nlosexclusion::GNSS_Raw r_iSV;
 
     double var_pr;
     double var_cp;
@@ -83,7 +83,7 @@ Eigen::Vector3d getXYZ_error(Eigen::MatrixXd est, Eigen::MatrixXd refSat, std::s
     return xyz_error;
 }
 
- Eigen::MatrixXd getAllPositions(nlosExclusion::GNSS_Raw_Array GNSS_data)
+ Eigen::MatrixXd getAllPositions(nlosexclusion::GNSS_Raw_Array GNSS_data)
 {
   Eigen::MatrixXd eAllSVPositions; // satellite positions   
   eAllSVPositions.resize(GNSS_data.GNSS_Raws.size(), 4);
@@ -97,7 +97,7 @@ Eigen::Vector3d getXYZ_error(Eigen::MatrixXd est, Eigen::MatrixXd refSat, std::s
   return eAllSVPositions;
 }
 
-Eigen::MatrixXd getAllMeasurements(nlosExclusion::GNSS_Raw_Array GNSS_data)
+Eigen::MatrixXd getAllMeasurements(nlosexclusion::GNSS_Raw_Array GNSS_data)
 {
   Eigen::MatrixXd eAllMeasurement; // pseudorange measurements 
   eAllMeasurement.resize(GNSS_data.GNSS_Raws.size(), 3);
@@ -115,7 +115,7 @@ function: check GNSS availability
 input: GNSS data
 output: bool 
 */
-bool checkAvailability(nlosExclusion::GNSS_Raw_Array GNSS_data) //
+bool checkAvailability(nlosexclusion::GNSS_Raw_Array GNSS_data) //
 {
   bool result = true;
   if(validateSV(getGPSCnt(GNSS_data), getBeiDouCnt(GNSS_data)) && (checkRepeating(GNSS_data)))
@@ -128,7 +128,7 @@ bool checkAvailability(nlosExclusion::GNSS_Raw_Array GNSS_data) //
   }
 }
 
-int getBeiDouCnt(nlosExclusion::GNSS_Raw_Array GNSS_data)
+int getBeiDouCnt(nlosexclusion::GNSS_Raw_Array GNSS_data)
 {
   int cnt = 0; 
   for(int i =0; i < GNSS_data.GNSS_Raws.size(); i++)
@@ -141,12 +141,25 @@ int getBeiDouCnt(nlosExclusion::GNSS_Raw_Array GNSS_data)
   return cnt;
 }
 
-int getGPSCnt(nlosExclusion::GNSS_Raw_Array GNSS_data)
+int getGPSCnt(nlosexclusion::GNSS_Raw_Array GNSS_data)
 {
   int cnt = 0; 
   for(int i =0; i < GNSS_data.GNSS_Raws.size(); i++)
   {
     if(PRNisGPS(GNSS_data.GNSS_Raws[i].prn_satellites_index))
+    {
+      cnt++;
+    }
+  }
+  return cnt;
+}
+
+int getLEOCnt(nlosexclusion::GNSS_Raw_Array GNSS_data)
+{
+  int cnt = 0; 
+  for(int i =0; i < GNSS_data.GNSS_Raws.size(); i++)
+  {
+    if(PRNisLEO(GNSS_data.GNSS_Raws[i].prn_satellites_index))
     {
       cnt++;
     }
@@ -172,10 +185,10 @@ bool validateSV(int gpsCnt, int BeidouCnt)
   }
 }
 
-bool checkRepeating(nlosExclusion::GNSS_Raw_Array GNSS_data) 
+bool checkRepeating(nlosexclusion::GNSS_Raw_Array GNSS_data) 
 {
   std::vector<int> satList;
-  nlosExclusion::GNSS_Raw_Array GNSS_dataTmp;
+  nlosexclusion::GNSS_Raw_Array GNSS_dataTmp;
   satList.clear();
   for(int i =0; i < GNSS_data.GNSS_Raws.size(); i++) // 
   {
@@ -190,10 +203,10 @@ bool checkRepeating(nlosExclusion::GNSS_Raw_Array GNSS_data)
   return true;
 }
 
-void removeRepeatedSV(nlosExclusion::GNSS_Raw_Array &GNSS_data) 
+void removeRepeatedSV(nlosexclusion::GNSS_Raw_Array &GNSS_data) 
 {
   std::vector<int> satList;
-  nlosExclusion::GNSS_Raw_Array GNSS_dataTmp;
+  nlosexclusion::GNSS_Raw_Array GNSS_dataTmp;
   satList.clear();
   for(int i =0; i < GNSS_data.GNSS_Raws.size(); i++) // 
   {
@@ -382,40 +395,6 @@ Eigen::MatrixXd ecef2enu(Eigen::MatrixXd originllh, Eigen::MatrixXd ecef) // tra
   */
 }
 
-    
-  /*
-author: Xiangru Wang
-function: ecef velocity to enu velocity
-input: original llh, and current ecef velocity(Matrix3d)
-output: velocity in ENU frame（Matrix3d）
-*/
-Eigen::MatrixXd ecefVelocity2enu(Eigen::MatrixXd originllh, Eigen::MatrixXd v_ecef)
-{
-  double pi = 3.1415926; // pi常数
-  double DEG2RAD = pi / 180.0;
-
-  Eigen::MatrixXd v_enu; 
-  v_enu.resize(3, 1); // 输出ENU速度向量为3X1
-
-  // 从originllh中提取经纬度（单位为度）
-  double lonDeg = originllh(0);
-  double latDeg = originllh(1);
-  // 转换为弧度
-  double lon = lonDeg * DEG2RAD;
-  double lat = latDeg * DEG2RAD;
-
-  // 使用旋转矩阵将ECEF速度向量转换到ENU速度向量
-  // 这里直接对速度分量进行旋转转换，不涉及平移操作
-  v_enu(0) = -sin(lon) * v_ecef(0) + cos(lon) * v_ecef(1);
-  v_enu(1) = -sin(lat) * cos(lon) * v_ecef(0) - sin(lat) * sin(lon) * v_ecef(1) + cos(lat) * v_ecef(2);
-  v_enu(2) =  cos(lat) * cos(lon) * v_ecef(0) + cos(lat) * sin(lon) * v_ecef(1) + sin(lat) * v_ecef(2);
-
-  return v_enu;
-}
-
-
-
-
 /*
 author: WEN Weisong, visiting Ph.D student in Univeristy of California, Berkeley. (weisong.wen@berkeley.edu)
 function: ecef to enu
@@ -561,7 +540,16 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
           eH_Matrix(idx, 3) = 1;
           eH_Matrix(idx, 4) = 1;
         }
-
+        else if (PRNisLEO(prn))
+        {
+          eH_Matrix(idx, 3) = 1;
+          eH_Matrix(idx, 4) = 1;
+        }
+        else
+        {
+          eH_Matrix(idx, 3) = 1;
+          eH_Matrix(idx, 4) = 1;
+        }
         // Making delta pseudorange
         double rcv_clk_bias;
         if (PRNisGPS(prn)){
@@ -571,6 +559,14 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
         {
           rcv_clk_bias = eWLSSolution(4);
         }
+        else if (PRNisLEO(prn))
+        {
+          rcv_clk_bias = eWLSSolution(4);
+        }
+        else
+        {
+          rcv_clk_bias = eWLSSolution(4);
+        } 
         // double sv_clk_bias = eExistingSVPositions(idx, 4) * CLIGHT;
         eDeltaPr(idx, 0) = pr - dGeoDistance + rcv_clk_bias;
         //printf("%2d - %f %f %f %f \n", prn, pr, dGeoDistance, eDeltaPr(idx, 0), rcv_clk_bias);
@@ -619,7 +615,7 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
    * @return eWLSSolution 5 unknowns with two clock bias variables
    @ 
   */
-  Eigen::MatrixXd WeightedLeastSquare(Eigen::MatrixXd eAllSVPositions, Eigen::MatrixXd eAllMeasurement, nlosExclusion::GNSS_Raw_Array GNSS_data, std::string method){
+  Eigen::MatrixXd WeightedLeastSquare(Eigen::MatrixXd eAllSVPositions, Eigen::MatrixXd eAllMeasurement, nlosexclusion::GNSS_Raw_Array GNSS_data, std::string method){
   
     Eigen::MatrixXd eWLSSolution;
     eWLSSolution.resize(5, 1);
@@ -639,7 +635,7 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
       weight_matrix.setIdentity();
     }
 
-    // std::cout << " weight_matrix-> " << weight_matrix<< std::endl;    
+     //std::cout << " weight_matrix-> " << weight_matrix<< std::endl;    
 
     /**after read the obs file, one measure is not right**/
     int validNumMeasure=0;
@@ -656,10 +652,10 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
     Eigen::MatrixXd validMeasurement; // for WLS 
     validMeasurement.resize(validNumMeasure,eAllMeasurement.cols());
     for (int idx = 0; idx < eAllMeasurement.rows(); idx++){
-      for (int jdx = 0; jdx < eAllSVPositions.rows(); jdx++){
+       for (int jdx = 0; jdx < eAllSVPositions.rows(); jdx++){
         if (int(eAllMeasurement(idx, 0)) == int(eAllSVPositions(jdx, 0))){
           for (int kdx = 0; kdx < eAllMeasurement.cols(); kdx++){
-            // std::cout<<"satellite prn -> "<<eAllMeasurement(idx, 0)<<"\n"<<std::endl;
+             //std::cout<<"satellite prn -> "<<eAllMeasurement(idx, 0)<<"\n"<<std::endl;
             validMeasurement(idx, kdx) = eAllMeasurement(idx, kdx);
             
           }
@@ -714,7 +710,7 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
 
       Eigen::MatrixXd eDeltaPos;
       eDeltaPos.resize(eWLSSolution.rows(), 1);
-
+      //std::cout << "iNumSV:=" << iNumSV << std::endl;
       for (int idx = 0; idx < iNumSV; idx++){
 
         int prn = int(validMeasurement(idx, 0));
@@ -760,6 +756,14 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
           rcv_clk_bias = eWLSSolution(3);       
         }
         // else if (PRNisBeidou(prn))
+        else if (PRNisBeidou(prn))
+        {
+          rcv_clk_bias = eWLSSolution(4);
+        }
+        else if (PRNisLEO(prn))
+        {
+          rcv_clk_bias = eWLSSolution(4);
+        }
         else
         {
           rcv_clk_bias = eWLSSolution(4);
@@ -771,6 +775,9 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
 
       // Least Square Estimation 
       // eDeltaPos = (eH_Matrix.transpose() * weight_matrix * eH_Matrix).ldlt().solve(eH_Matrix.transpose() * weight_matrix *  eDeltaPr);
+      // std::cout << "eH_Matrix: rows = " << eH_Matrix.rows() << ", cols = " << eH_Matrix.cols() << std::endl;
+      // std::cout << "weight_matrix: rows = " << weight_matrix.rows() << ", cols = " << weight_matrix.cols() << std::endl;
+      // std::cout << "eDeltaPr: rows = " << eDeltaPr.rows() << ", cols = " << eDeltaPr.cols() << std::endl; 
       eDeltaPos = (eH_Matrix.transpose() * weight_matrix * eH_Matrix).inverse() * eH_Matrix.transpose() * weight_matrix * eDeltaPr;
       //eDeltaPos = eH_Matrix.householderQr().solve(eDeltaPr);
 
@@ -818,220 +825,8 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
 
     return eWLSSolution;
   }
-  Eigen::MatrixXd WeightedLeastSquare_dk(Eigen::MatrixXd eAllSVPositions, Eigen::MatrixXd eAllMeasurement, nlosExclusion::GNSS_Raw_Array GNSS_data, std::string method){
 
-        Eigen::MatrixXd eWLSSolution;
-        eWLSSolution.resize(6, 1);
-
-        MatrixXd weight_matrix; //goGPS weighting
-        if(method == "WLS")
-        {
-            weight_matrix = cofactorMatrixCal_WLS(GNSS_data, method); //goGPS weighting;
-        }
-        else if(method == "R-WLS")
-        {
-            weight_matrix = cofactorMatrixCal_R_WLS(GNSS_data, method); //goGPS weighting;
-        }
-        else if (method == "LS")
-        {
-            weight_matrix = cofactorMatrixCal_WLS(GNSS_data, method); //goGPS weighting;
-            weight_matrix.setIdentity();
-        }
-
-        // std::cout << " weight_matrix-> " << weight_matrix<< std::endl;
-
-        /**after read the obs file, one measure is not right**/
-        int validNumMeasure=0;
-        std::vector<int> validMeasure;
-        for (int idx = 0; idx < eAllMeasurement.rows(); idx++){
-            for (int jdx = 0; jdx < eAllSVPositions.rows(); jdx++){
-                if (int(eAllMeasurement(idx, 0)) == int(eAllSVPositions(jdx, 0))){
-                    validNumMeasure++;
-                    validMeasure.push_back(int(eAllMeasurement(idx, 0)));
-                }
-            }
-        }
-
-        Eigen::MatrixXd validMeasurement; // for WLS
-        validMeasurement.resize(validNumMeasure,eAllMeasurement.cols());
-        for (int idx = 0; idx < eAllMeasurement.rows(); idx++){
-            for (int jdx = 0; jdx < eAllSVPositions.rows(); jdx++){
-                if (int(eAllMeasurement(idx, 0)) == int(eAllSVPositions(jdx, 0))){
-                    for (int kdx = 0; kdx < eAllMeasurement.cols(); kdx++){
-                        // std::cout<<"satellite prn -> "<<eAllMeasurement(idx, 0)<<"\n"<<std::endl;
-                        validMeasurement(idx, kdx) = eAllMeasurement(idx, kdx);
-
-                    }
-                }
-            }
-        }
-
-
-
-        int iNumSV = validMeasurement.rows();
-
-        /*Find the received SV and Sort based on the order of Measurement matrix*/
-        Eigen::MatrixXd eExistingSVPositions; // for WLS
-        eExistingSVPositions.resize(iNumSV, eAllSVPositions.cols());
-
-        for (int idx = 0; idx < validMeasurement.rows(); idx++){
-            for (int jdx = 0; jdx < eAllSVPositions.rows(); jdx++){
-                if (int(validMeasurement(idx, 0)) == int(eAllSVPositions(jdx, 0))){
-                    for (int kdx = 0; kdx < eAllSVPositions.cols(); kdx++){
-                        // std::cout<<"satellite prn -> "<<eAllMeasurement(idx, 0)<<"\n"<<std::endl;
-                        eExistingSVPositions(idx, kdx) = eAllSVPositions(jdx, kdx);
-
-                    }
-                }
-            }
-        }
-        //for (int idx = 0; idx < eExistingSVPositions.rows(); idx++){
-        //  printf("%2d-[%3d] - (%10.2f,%10.2f,%10.2f) %f\n", idx, int(eExistingSVPositions(idx, 0)), eExistingSVPositions(idx, 1), eExistingSVPositions(idx, 2), eExistingSVPositions(idx, 3), eExistingSVPositions(idx, 4)*CLIGHT);
-        //}
-
-        //Intialize the result by guessing.
-        for (int idx = 0; idx < eWLSSolution.rows(); idx++){
-            eWLSSolution(idx, 0) = 0;
-        }
-
-        // for the case of insufficient satellite
-        if (iNumSV < 5){
-            return eWLSSolution;
-        }
-
-        bool bWLSConverge = false;
-
-        int count = 0;
-        Eigen::MatrixXd eH_Matrix_;
-        while (!bWLSConverge)
-        {
-            Eigen::MatrixXd eH_Matrix;
-            eH_Matrix.resize(iNumSV, eWLSSolution.rows());
-
-            Eigen::MatrixXd eDeltaPr;
-            eDeltaPr.resize(iNumSV, 1);
-
-            Eigen::MatrixXd eDeltaPos;
-            eDeltaPos.resize(eWLSSolution.rows(), 1);
-
-            for (int idx = 0; idx < iNumSV; idx++){
-
-                int prn = int(validMeasurement(idx, 0));
-                double pr = validMeasurement(idx, 2);
-
-                // Calculating Geometric Distance
-                double rs[3], rr[3], e[3];
-                double dGeoDistance;
-
-                rs[0] = eExistingSVPositions(idx, 1);
-                rs[1] = eExistingSVPositions(idx, 2);
-                rs[2] = eExistingSVPositions(idx, 3);
-
-                rr[0] = eWLSSolution(0);
-                rr[1] = eWLSSolution(1);
-                rr[2] = eWLSSolution(2);
-
-                // dGeoDistance = geodist(rs, rr, e);
-                dGeoDistance = sqrt(pow((rs[0] - rr[0]),2) + pow((rs[1] - rr[1]),2) +pow((rs[2] - rr[2]),2));
-
-                double OMGE_ = 7.2921151467E-5;
-                double CLIGHT_ = 299792458.0;
-                dGeoDistance = dGeoDistance + OMGE_ * (rs[0]*rr[1]-rs[1]*rr[0])/CLIGHT_;
-
-                // Making H matrix
-                eH_Matrix(idx, 0) = -(rs[0] - rr[0]) / dGeoDistance;
-                eH_Matrix(idx, 1) = -(rs[1] - rr[1]) / dGeoDistance;
-                eH_Matrix(idx, 2) = -(rs[2] - rr[2]) / dGeoDistance;
-
-                if (PRNisGPS(prn)){
-                    eH_Matrix(idx, 3) = 1;
-                    eH_Matrix(idx, 4) = 0;
-                    eH_Matrix(idx, 5) = 0;
-                }
-                else if (PRNisGLONASS(prn))
-                {
-                    eH_Matrix(idx, 3) = 0;
-                    eH_Matrix(idx, 4) = 1;
-                    eH_Matrix(idx, 5) = 0;
-                }
-                else if (PRNisBeidou(prn))
-                {
-                    eH_Matrix(idx, 3) = 0;
-                    eH_Matrix(idx, 4) = 0;
-                    eH_Matrix(idx, 5) = 1;
-                }
-
-                // Making delta pseudorange
-                double rcv_clk_bias = 0;
-                if (PRNisGPS(prn)){
-                    rcv_clk_bias = eWLSSolution(3);
-                }
-                    // else if (PRNisBeidou(prn))
-                else if (PRNisGLONASS(prn))
-                {
-                    rcv_clk_bias = eWLSSolution(4);
-                }
-                else if (PRNisBeidou(prn))
-                {
-                    rcv_clk_bias = eWLSSolution(5);
-                }
-                // double sv_clk_bias = eExistingSVPositions(idx, 4) * CLIGHT;
-                eDeltaPr(idx, 0) = pr - dGeoDistance - rcv_clk_bias;
-                // printf("%2d - %f %f %f %f \n", prn, pr, dGeoDistance, eDeltaPr(idx, 0), rcv_clk_bias);
-            }
-
-            // Least Square Estimation
-            // eDeltaPos = (eH_Matrix.transpose() * weight_matrix * eH_Matrix).ldlt().solve(eH_Matrix.transpose() * weight_matrix *  eDeltaPr);
-            eDeltaPos = (eH_Matrix.transpose() * weight_matrix * eH_Matrix).inverse() * eH_Matrix.transpose() * weight_matrix * eDeltaPr;
-            //eDeltaPos = eH_Matrix.householderQr().solve(eDeltaPr);
-
-            //for (int idx = 0; idx < eDeltaPos.rows(); idx++)
-            //  printf("%f ", eDeltaPos(idx));
-            //printf("\n");
-
-            eWLSSolution(0) += eDeltaPos(0);
-            eWLSSolution(1) += eDeltaPos(1);
-            eWLSSolution(2) += eDeltaPos(2);
-            eWLSSolution(3) += eDeltaPos(3);
-            eWLSSolution(4) += eDeltaPos(4);
-            eWLSSolution(5) += eDeltaPos(5);
-
-            eH_Matrix_ = eH_Matrix;
-
-            for (int i = 0; i < 3; ++i){
-                //printf("%f\n", fabs(eDeltaPos(i)));
-                if (fabs(eDeltaPos(i)) >1e-4)
-                {
-                    bWLSConverge = false;
-                }
-                else {
-                    bWLSConverge = true;
-                    // std::cout<< "eDeltaPr-> " << eDeltaPr << std::endl;
-                };
-
-            }
-            count += 1;
-            if (count > 10)
-            {
-                bWLSConverge = true;
-                // std::cout<<" more than 10 times in iterations"<<std::endl;
-
-            }
-
-        }
-        // printf("WLS -> (%11.2f,%11.2f,%11.2f)\n\n", eWLSSolution(0), eWLSSolution(1), eWLSSolution(2));
-        std::cout << std::setprecision(12);
-
-#if 0 // debug result
-        std::cout<<"eH_Matrix-> \n" << eH_Matrix_ << std::endl;
-    std::cout<<"iterations-> " << count << std::endl;
-    std::cout<< "---------------WLS (ECEF) x, y, z, bias_gps, bias_beidou-----------------  \n"<<eWLSSolution<<std::endl;
-#endif
-
-        return eWLSSolution;
-    }
-
-  Eigen::MatrixXd getPseudorangeResidual(Eigen::MatrixXd eWLSSolution, nlosExclusion::GNSS_Raw_Array GNSS_data)
+  Eigen::MatrixXd getPseudorangeResidual(Eigen::MatrixXd eWLSSolution, nlosexclusion::GNSS_Raw_Array GNSS_data)
   {
     Eigen::MatrixXd eWLSSolutionResidual;
     eWLSSolutionResidual.resize(GNSS_data.GNSS_Raws.size(),1);
@@ -1101,21 +896,6 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
     }
   }
 
-   /**
-  * @brief satellite set validation
-  * @param prn
-  * @return ture/false
-  @
-  */
-   bool PRNisGAL(int prn)
-   {
-       if (prn > 56 && prn <= 87)
-           return true;
-       else{
-           return false;
-       }
-   }
-
   /**
    * @brief satellite set validation
    * @param prn
@@ -1124,7 +904,15 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
    */
   bool PRNisBeidou(int prn)
   {
-    if ((prn <= 121) && (prn > 87))
+    if ((prn <= 121) && (prn >= 87))
+      return true;
+    else{
+      return false;
+    }
+  }
+  bool PRNisLEO(int prn)
+  {
+    if (prn >= 1000)
       return true;
     else{
       return false;
@@ -1132,14 +920,13 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
   }
 
 
-
   /**
    * @brief covariance estimation
-   * @param nlosExclusion::GNSS_Raw_Array GNSS_data
+   * @param nlosexclusion::GNSS_Raw_Array GNSS_data
    * @return weight_matrix
    @ 
    */
-  Eigen::MatrixXd cofactorMatrixCal_WLS(nlosExclusion::GNSS_Raw_Array GNSS_data, std::string method)
+  Eigen::MatrixXd cofactorMatrixCal_WLS(nlosexclusion::GNSS_Raw_Array GNSS_data, std::string method)
   {
     Eigen::Matrix<double,4,1> parameters;
     parameters<<50.0, 30.0, 30.0, 10.0; // loosely coupled 
@@ -1184,39 +971,13 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
     }
   }
 
-  /**
-   * @brief covariance estimation
-   * @param nlosExclusion::GNSS_Raw_Array GNSS_data
-   * @return weight_matrix
-   @ 
-   */
-  double eleSRNVar(double ele, double snr)
-  {
-    Eigen::Matrix<double,4,1> parameters;
-    parameters<<50.0, 30.0, 30.0, 10.0; // loosely coupled 
-    // parameters<<50.0, 30.0, 20.0, 30.0; // loosely coupled 
-    double snr_1 = parameters(0); // T = 50
-    double snr_A = parameters(1); // A = 30
-    double snr_a = parameters(2);// a = 30
-    double snr_0 = parameters(3); // F = 10
-
-    double snr_R = snr;
-    double elR = ele;
-    double q_R_1 = 1 / (pow(( sin(elR * 3.1415926/180.0 )),2));
-    double q_R_2 = pow(10,(-(snr_R - snr_1) / snr_a));
-    double q_R_3 = (((snr_A / (pow(10,(-(snr_0 - snr_1) / snr_a))) - 1) / (snr_0 - snr_1)) * (snr_R - snr_1) + 1);
-    double q_R = q_R_1* (q_R_2 * q_R_3);
-    double weghting =(1.0/float(q_R)); // uncertainty: cofactor_[i] larger, larger uncertainty
-    return (1.0/weghting);
-  }
-
     /**
    * @brief covariance estimation for R-WLS
-   * @param nlosExclusion::GNSS_Raw_Array GNSS_data
+   * @param nlosexclusion::GNSS_Raw_Array GNSS_data
    * @return weight_matrix
    @ 
    */
-  Eigen::MatrixXd cofactorMatrixCal_R_WLS(nlosExclusion::GNSS_Raw_Array GNSS_data, std::string method)
+  Eigen::MatrixXd cofactorMatrixCal_R_WLS(nlosexclusion::GNSS_Raw_Array GNSS_data, std::string method)
   {
     Eigen::Matrix<double,4,1> parameters;
     double factor = 0.75;
@@ -1279,7 +1040,7 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
    * @return eWLSSolution 5 unknowns with two clock bias variables
    @ 
   */
-  Eigen::MatrixXd WeightedLeastSquare_GPS(Eigen::MatrixXd eAllSVPositions, Eigen::MatrixXd eAllMeasurement, nlosExclusion::GNSS_Raw_Array GNSS_data){
+  Eigen::MatrixXd WeightedLeastSquare_GPS(Eigen::MatrixXd eAllSVPositions, Eigen::MatrixXd eAllMeasurement, nlosexclusion::GNSS_Raw_Array GNSS_data){
   
     Eigen::MatrixXd eWLSSolution;
     eWLSSolution.resize(4, 1);
@@ -1449,7 +1210,7 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
    * @return covariance matrix for the estimated states
    @ 
   */
-  Eigen::MatrixXd getCovarianceMatrix(Eigen::MatrixXd eAllSVPositions, Eigen::MatrixXd eAllMeasurement, nlosExclusion::GNSS_Raw_Array GNSS_data, std::string method){
+  Eigen::MatrixXd getCovarianceMatrix(Eigen::MatrixXd eAllSVPositions, Eigen::MatrixXd eAllMeasurement, nlosexclusion::GNSS_Raw_Array GNSS_data, std::string method){
   
     Eigen::MatrixXd eWLSSolution;
     eWLSSolution.resize(5, 1);
@@ -1815,7 +1576,7 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
       jacobian_matrix(jac_row, i) = 0; 
     }
     
-    jacobian_matrix(jac_row, 3 + carrier_phase_index) = dd_measurement.r_master_SV.lamda;
+    jacobian_matrix(jac_row, 3 + carrier_phase_index) = dd_measurement.r_master_SV.lambda;
 
     // weighting_matrix(jac_row,jac_row) = 1.0/(var_u2m + var_u2i + var_r2m + var_r2i);
     weighting_matrix(jac_row,jac_row) = 1.0/(pow(0.004, 2));
@@ -1841,7 +1602,7 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
   }
 
   /* get variance for carrier-phase from a single satellite based on elevation/SNR */
-  double getVarofCp_ele_SNR(nlosExclusion::GNSS_Raw single_sat_data)
+  double getVarofCp_ele_SNR(nlosexclusion::GNSS_Raw single_sat_data)
   {
     Eigen::Matrix<double,4,1> parameters;
     parameters<<50.0, 30.0, 30.0, 10.0; // loosely coupled 
@@ -1891,7 +1652,7 @@ Eigen::MatrixXd enu2ecef(Eigen::MatrixXd originllh, Eigen::MatrixXd enu) // tran
   }
 
     /* get variance for pseudorange from a single satellite based on elevation/SNR */
-  double getVarofpr_ele_SNR(nlosExclusion::GNSS_Raw single_sat_data)
+  double getVarofpr_ele_SNR(nlosexclusion::GNSS_Raw single_sat_data)
   {
     Eigen::Matrix<double,4,1> parameters;
     parameters<<50.0, 30.0, 30.0, 10.0; // loosely coupled 
