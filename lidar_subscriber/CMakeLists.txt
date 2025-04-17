@@ -56,7 +56,12 @@ include_directories(
 
 find_package(Glog)
 find_package(Ceres REQUIRED)
-
+include_directories(
+  ${EIGEN3_INCLUDE_DIR}
+  ${GLOG_INCLUDE_DIR}
+  ${catkin_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/
+)
 
 find_package(Gflags)
 
@@ -179,7 +184,7 @@ target_link_libraries(uwb_imu_batch_node ${catkin_LIBRARIES} ${CERES_LIBRARIES}
 
 
 #add_executable(loam_mapping_node src/loam_mapping_node.cpp)
-t#arget_link_libraries(loam_mapping_node
+#target_link_libraries(loam_mapping_node
 #  ${catkin_LIBRARIES}
 #  ${PCL_LIBRARIES}
 #  ${CERES_LIBRARIES}
