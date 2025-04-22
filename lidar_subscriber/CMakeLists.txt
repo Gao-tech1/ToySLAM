@@ -35,7 +35,7 @@ find_package(catkin REQUIRED COMPONENTS
   gnss_comm
 )
 
-#find_package(absl REQUIRED)
+# find_package(absl REQUIRED)
 
 find_package(PCL 1.8 REQUIRED COMPONENTS common io filters kdtree)
 # find_package(PCL REQUIRED)
@@ -54,17 +54,11 @@ include_directories(
   xmlrpcpp
 )
 
-find_package(Glog)
 find_package(Ceres REQUIRED)
-include_directories(
-  ${EIGEN3_INCLUDE_DIR}
-  ${GLOG_INCLUDE_DIR}
-  ${catkin_INCLUDE_DIRS}
-  ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/
-)
+
 
 find_package(Gflags)
-
+find_package(Glog)
 include_directories(${GFLAGS_INCLUDE_DIRS} ${GLOG_INCLUDE_DIRS})
 include_directories(include)
 
@@ -179,24 +173,24 @@ target_link_libraries(uwb_imu_batch_node ${catkin_LIBRARIES} ${CERES_LIBRARIES}
   ${PCL_LIBRARIES}
   # pclomp
   OpenMP::OpenMP_CXX
-  #absl::strings
+  # absl::strings
 )
 
 
-#add_executable(loam_mapping_node src/loam_mapping_node.cpp)
-#target_link_libraries(loam_mapping_node
-#  ${catkin_LIBRARIES}
-#  ${PCL_LIBRARIES}
-#  ${CERES_LIBRARIES}
-#  # pclomp
-#  OpenMP::OpenMP_CXX
-#)
+add_executable(loam_mapping_node src/loam_mapping_node.cpp)
+target_link_libraries(loam_mapping_node
+  ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
+  ${CERES_LIBRARIES}
+  # pclomp
+  OpenMP::OpenMP_CXX
+)
 
 add_executable(gnssSpp src/gnssSpp.cpp)
 target_link_libraries(gnssSpp ${catkin_LIBRARIES} ${CERES_LIBRARIES}
   ${catkin_LIBRARIES}
-  # ${PCL_LIBRARIES}
+  ${PCL_LIBRARIES}
   # pclomp
   OpenMP::OpenMP_CXX
-  #absl::strings
+  # absl::strings
 )
